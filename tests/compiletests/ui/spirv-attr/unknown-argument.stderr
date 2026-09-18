@@ -1,0 +1,20 @@
+error: unknown argument `fragmnt` to spirv attribute; did you mean `fragment`?
+  --> $DIR/unknown-argument.rs:10:9
+   |
+LL | #[spirv(fragmnt)]
+   |         ^^^^^^^
+
+error: unknown argument `uinform` to spirv attribute; did you mean `uniform`?
+  --> $DIR/unknown-argument.rs:14:24
+   |
+LL | fn _typo_param(#[spirv(uinform)] _: ()) {}
+   |                        ^^^^^^^
+
+error: unknown argument `zzzzzzzz` to spirv attribute
+  --> $DIR/unknown-argument.rs:17:28
+   |
+LL | fn _no_close_match(#[spirv(zzzzzzzz)] _: ()) {}
+   |                            ^^^^^^^^
+
+error: aborting due to 3 previous errors
+

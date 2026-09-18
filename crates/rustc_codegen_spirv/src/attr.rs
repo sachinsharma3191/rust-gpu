@@ -650,7 +650,7 @@ fn parse_spirv_attr<'a>(
                     }
                 };
                 sym.attributes.get(&name.name).map_or_else(
-                    || Err((name.span, "unknown argument to spirv attribute".to_string())),
+                    || Err((name.span, unknown_attr_argument_message(sym, name.name))),
                     |a| {
                         Ok(match a {
                             SpirvAttribute::Entry(entry) => SpirvAttribute::Entry(
@@ -664,6 +664,25 @@ fn parse_spirv_attr<'a>(
         Ok((span, parsed_attr))
     })
     .collect()
+}
+
+/// Names the rejected argument, and suggests the closest known one.
+///
+/// A proc macro that stamps its invocation span onto generated tokens leaves
+/// the span pointing at the macro call rather than the offending argument, so
+/// the name in the message is the only thing identifying it (issue #355).
+fn unknown_attr_argument_message(sym: &Symbols, name: Symbol) -> String {
+    let mut candidates: Vec<Symbol> = sym.attributes.keys().copied().collect();
+    // `attributes` is a hash map: sort so a tie between equally close
+    // candidates always prints the same suggestion.
+    candidates.sort_by(|a, b| a.as_str().cmp(b.as_str()));
+
+    let mut msg = format!("unknown argument `{name}` to spirv attribute");
+    if let Some(best) = rustc_span::edit_distance::find_best_match_for_name(&candidates, name, None)
+    {
+        msg.push_str(&format!("; did you mean `{best}`?"));
+    }
+    msg
 }
 
 fn parse_spec_constant_attr(
